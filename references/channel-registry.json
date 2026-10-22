@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-27",
+  "rule": "source_search.py 与蒸馏 agent 只允许使用本表登记且 status 为 verified/available 的渠道。新作品开批次前必须先登记渠道；渠道实测后更新 status。SKILL 正文与各游戏 SOP 不复制渠道清单，统一引用本表。",
+  "status_semantics": {
+    "verified": "已实跑验证，默认参与调度",
+    "available": "已登记未全量验证，允许使用",
+    "disabled": "登记但停用（按 disabled_for 或全局）",
+    "excluded": "禁止使用（含原因）"
+  },
+  "channels": [
+    {
+      "id": "official",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "notes": "用户提供的官方材料：设定集、访谈原文、BD 特典、官方字幕、截图、游戏剧情文本。压倒其他一切来源。"
+    },
+    {
+      "id": "user_material",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "notes": "同 official，会话中用户手动补充的材料。"
+    },
+    {
+      "id": "moegirl",
+      "applies_to": [
+        "*"
+      ],
+      "endpoint": "https://zh.moegirl.org.cn/api.php",
+      "script": "scripts/moegirl_api.py",
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "verified",
+      "notes": "萌娘百科 MediaWiki API。2026-09-05 实测连通（丰川祥子 intro 模式）。支持 intro/full/search/wikitext 四模式。"
+    },
+    {
+      "id": "bwiki",
+      "applies_to": [
+        "*"
+      ],
+      "endpoint": "https://wiki.biligame.com/{game}/api.php",
+      "script": "scripts/bwiki_api.py",
+      "tier": "medium",
+      "officiality": "secondary",
+      "status": "verified",
+      "disabled_for": [
+        "鸣潮",
+        "Wuthering Waves"
+      ],
+      "notes": "BWIKI（B站游戏Wiki），game slug 映射见 bwiki_api.py GAME_SLUG_MAP。鸣潮子站（wutheringwaves）未收录角色页，椿批次已记录失败跳过，故对鸣潮禁用。"
+    },
+    {
+      "id": "hsr_official_story",
+      "applies_to": [
+        "崩坏：星穹铁道",
+        "星穹铁道",
+        "Honkai: Star Rail",
+        "Star Rail"
+      ],
+      "endpoint": "https://act-api-takumi-static.mihoyo.com/common/blackboard/sr_wiki/v1",
+      "page_base": "https://bbs.mihoyo.com/sr/wiki/content/{id}/detail?bbs_presentation_style=no_header",
+      "script": "scripts/hsr_official_api.py",
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "notes": "米哈游星铁官方 Wiki API。批量期 39 条来源中 35 条 highest 级主要出自此处；剧情索引页为动态渲染，需按 hsr_official_story_source 的 warning 流程处理。"
+    },
+    {
+      "id": "arknights_gamedata",
+      "applies_to": [
+        "明日方舟",
+        "Arknights"
+      ],
+      "endpoint": "https://github.com/Kengxxiao/ArknightsGameData",
+      "script": "scripts/ak_evidence.py（语料库管线：ak_build_roster / ak_distill / ak_enhance）",
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "notes": "明日方舟官方游戏文本仓库（干员档案/语音/密录/剧情正文）。整仓 dump 进语料库后按角色切片；每个角色的 sources.json 以 ak-corpus-* id 记录。本地镜像 examples/明日方舟/_corpus/剧情一览/。与用户指定的 PRTS/ASTR 内容同源，冲突时以本渠道原文为准（最高优先级）。"
+    },
+    {
+      "id": "kurobbs_wiki",
+      "applies_to": [
+        "鸣潮",
+        "Wuthering Waves"
+      ],
+      "endpoint": "https://api.kurobbs.com/wiki/core/catalogue/config/getTree",
+      "page_base": "https://wiki.kurobbs.com/mc/catalogue/list",
+      "script": "scripts/mc_wiki_api.py",
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "notes": "库街区（鸣潮官方 Wiki）API。`corpus` 子命令批量抓取官方文本建语料库（examples/鸣潮/_corpus）；_batch/official-sources.json 记录 124 条官方来源索引。"
+    },
+    {
+      "id": "zzz_wikiwiki",
+      "applies_to": [
+        "绝区零",
+        "Zenless Zone Zero"
+      ],
+      "endpoint": "https://wikiwiki.jp/zenless/",
+      "script": "scripts/zzz_wiki_api.py",
+      "tier": "high",
+      "officiality": "secondary",
+      "language": "ja-JP",
+      "status": "verified",
+      "notes": "日文 Wiki，用户指定语料（user_designated_corpus）。注意：它不是米哈游官方站点，officiality 记 secondary。实测（2026-09-19/21 批次）：scripts/zzz_wiki_api.py crawl 增量刷新快照 .csp-work/zzz-jp-corpus.json（URL 去重只抓新增，429 自动退避；381→389 页 0 失败）。页面构成=三大剧情命名空间（メインストーリー/エージェント秘話/信頼イベント）+ roster 全角色主页。分发用 zzz_distribute_modules.py（プロフィール节选/信赖整页/秘话按说话者前缀聚合归属≥40%且≥20次）。坑：直角引号全半角混用与 roster 名含全角空格，匹配前必须 normalize；缺页如实登记——7 席无专属信赖页、克拉蕾/洛克茜无任何页面。Wiki 的考察/攻略/配队/评论/编辑者总结不得作为角色行为证据。"
+    },
+    {
+      "id": "zzz_story_dump",
+      "applies_to": [
+        "绝区零"
+      ],
+      "endpoint": null,
+      "script": "scripts/zzz_select_translation_excerpt.py / zzz_translation_check.py（摘选与校验）",
+      "tier": "highest",
+      "officiality": "official",
+      "language": "ja-JP",
+      "status": "verified",
+      "notes": "日文官方剧情原文 dump，存于各角色 references/jp-original/（约 22 文件 / 12 万行 / 3.3MB 每角色）。无远程端点，本地语料。"
+    },
+    {
+      "id": "mediawiki",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "通用 MediaWiki 适配器（placeholder，未实现专用脚本）；使用时走 WebFetch 兜底并记录。"
+    },
+    {
+      "id": "wikipedia",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "Wikipedia，用于世界观与作品级背景，角色细节需交叉验证。"
+    },
+    {
+      "id": "fandom",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "作品 Fandom Wiki，按作品子站使用。"
+    },
+    {
+      "id": "bangumi",
+      "applies_to": [
+        "*"
+      ],
+      "endpoint": "https://bgm.tv",
+      "tier": "medium",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "Bangumi，作品条目与声优/制作信息。"
+    },
+    {
+      "id": "anidb",
+      "applies_to": [
+        "*"
+      ],
+      "endpoint": "https://anidb.net",
+      "tier": "medium",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "AniDB，动画元数据补充。"
+    },
+    {
+      "id": "bestdori",
+      "applies_to": [
+        "BanG Dream",
+        "BanG Dream!",
+        "MyGO",
+        "Ave Mujica"
+      ],
+      "endpoint": "https://bestdori.com",
+      "tier": "medium",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "BanG Dream! 系列数据库（卡牌/剧情/语音索引）。"
+    },
+    {
+      "id": "bilibili_column",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "medium",
+      "officiality": "secondary",
+      "status": "available",
+      "notes": "B站高质量专栏，仅作补充；须逐条标注可信度。"
+    },
+    {
+      "id": "fan_discussion",
+      "applies_to": [
+        "*"
+      ],
+      "tier": "low",
+      "officiality": "fan_speculation",
+      "status": "available",
+      "notes": "粉丝讨论/社区解读。引用时必须标注为推测，不得作为核心行为模式依据。"
+    },
+    {
+      "id": "prts",
+      "applies_to": [
+        "明日方舟",
+        "Arknights"
+      ],
+      "endpoint": "https://prts.wiki",
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "verified",
+      "notes": "用户指定语料（user_designated_corpus，2026-09-06 用户命令指定 PRTS 剧情一览为方舟批次来源，覆盖此前 excluded 决定）。站点为玩家维护的剧情转录（角色：台词格式），文本与官方游戏文本同源但经人工转录，故 officiality 记 secondary、tier 记 high；人格素材与 arknights_gamedata 官方语料重叠，冲突时以官方仓库原文为准。此前 excluded 记录见 examples/明日方舟/阿米娅skill/references/sources.json。 | 实测（2026-09-07）：直接 api.php 请求返回 403（Tengine），携带浏览器 UA（Mozilla/5.0 Chrome/126 + Accept/Accept-Language 头）可正常访问页面（200，约 700KB）；页面为服务端渲染 HTML，无公开结构化剧情 API；批量语料走 arknights_gamedata 同源通道，PRTS 用于交叉校验。",
+      "scope": "剧情一览（主线/活动/支线/故事集/干员档案/干员密录）"
+    },
+    {
+      "id": "astr",
+      "applies_to": [
+        "明日方舟",
+        "Arknights"
+      ],
+      "endpoint": "https://050644zf.github.io/ArknightsStoryTextReader/index2.html#/zh_CN/menu",
+      "data_base": "https://050644zf.github.io/ArknightsStoryTextReader/data/",
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "verified",
+      "scope": "主线/活动/支线/故事集剧情纯文本（基于官方解包数据，版本更新后数小时同步）",
+      "notes": "用户指定语料（user_designated_corpus，2026-09-06）。ArknightsStoryTextReader 纯文本剧情阅读器，文本与 Kengxxiao/ArknightsGameData 官方解包数据同源（verbatim），故叙事文本可信度按官方原文对齐，站点本身非官方站点故 officiality 记 secondary。用于语料库补缺（最新活动）与 PRTS 交叉校验。 | 实测（2026-09-07）：index2.html 为 JS 重定向壳；应用本体 assets/main.*.js 为打包产物，内含无明文 gamedata/数据端点常量；剧情数据由前端运行时拉取，无稳定静态 JSON 直链——批量语料不可依赖本站直抓，改走 arknights_gamedata 官方仓库（同源文本），ASTR 保留为人工阅读与对照入口。"
+    },
+    {
+      "id": "genshin_yatta",
+      "applies_to": [
+        "原神",
+        "Genshin",
+        "Genshin Impact"
+      ],
+      "endpoint": "https://gi.yatta.moe/api/v2/{lang}",
+      "page_base": "https://gi.yatta.moe/chs/archive",
+      "script": "scripts/genshin_yatta_api.py",
+      "tier": "highest",
+      "officiality": "official",
+      "status": "verified",
+      "scope": "角色页全套（资料/其他/Companion/故事/语音文字版）+ 全任务对话（taskData 链式对话 + MultiDialog 分支 + narratorData 旁白）",
+      "notes": "用户指定语料（user_designated_corpus，2026-09-06 用户命令指定 gi.yatta.moe 为原神批次来源）。Project Amber（原 ambr.top）官方数据驱动资料库：正文直接取自后端 JSON，与游戏解包文本同源（verbatim、无人工转录环节），按官方原文对齐、officiality 记 official。分支语义（2026-09-06 实测）：任务对话 taskData.items 中 MultiDialog 节点每个选项携带独立 next，全量采集必须逐分支遍历；narratorData 为旁白（role 空），须与角色台词隔离。quest-scan 支持断点续跑（按 quest/{id}.json 存在性跳过）。；7.1 增量同步（2026-10-07）：+23 任务（aq×2 至冬线 1702/1703、eq×5、wq×16 含至冬宫系列 77664-77688），无新实装角色，角色 raw 362→364 文件；任务索引 1714→1737。教训：--out 参数须传语料根目录（脚本自拼 raw/yatta/），传 raw/yatta 会产生嵌套垃圾树。",
+      "last_sync": "2026-10-07 (v7.1)"
+    },
+    {
+      "id": "hsr_bwiki_story",
+      "applies_to": [
+        "崩坏：星穹铁道"
+      ],
+      "tier": "medium",
+      "officiality": "secondary",
+      "endpoint": "https://wiki.biligame.com/sr/api.php",
+      "script": "runs/hsr_bwiki_crawl_2026-09-18.py",
+      "priority": 1,
+      "status": "verified",
+      "notes": "BWIKI（wiki.biligame.com/sr）任务页全量剧情，wikitext 原生携带剧情选项分支（{{剧情选项|选项N=|剧情N=}}，分支独有台词在块内、共享后文在块外，无膨胀）；{{任务}} 模板元数据：任务地区/任务类型/所属版本/系列任务/出场人物/任务编号（支撑版本×篇章分桶选证）。实测（2026-09-18/19）：分类成员用 categorymembers 分页（cmsort=sortkey+cmcontinue）；WAF 567 为 IP 级限流（与 UA 无关），长退避 2-10min + 磁盘缓存（runs/bwiki-page-cache 按 title-hash）续跑有效，并发≤3；五分类页数：开拓239/同行37/冒险122/活动183/日常34=615 unique，539 有效入库、76 系列索引页跳过（无任务模板且<400字）。2026-09-18 起用户指定为星铁剧情语料主源；米游社官方档案语料（角色故事/语音）仍为 highest。"
+    },
+    {
+      "id": "fz_wiki",
+      "applies_to": [
+        "明日方舟：终末地",
+        "终末地",
+        "Arknights: Endfield",
+        "Endfield"
+      ],
+      "endpoint": "https://fz.wiki",
+      "page_base": "https://fz.wiki/wiki/{page}",
+      "script": "scripts/endfield_wiki_api.py",
+      "tier": "high",
+      "officiality": "secondary",
+      "status": "verified",
+      "notes": "终末地 WIKI（用户指定主源，2026-09-20 实测）。Next.js 站点无 MediaWiki API：页面数据嵌在 HTML 内 self.__next_f RSC payload（JSON 字符串分片，按序拼接后 json.loads 解码）。/wiki/干员=名册 wikiIndexTable；/wiki/干员/<名>=档案·语音（endfieldCardCharacterArchive__archive/__voice，中文语音文字版直接内嵌）；/wiki/任务=endfieldCardQuestIndex（label=主线任务 的 chapters 树）；/wiki/任务/<章节>/<名>=endfieldCardQuestFlow 结构化对话（actor/text/emotion/choice options）。直连可用无需特殊 UA，URL 需百分号编码（干员名含间隔号 · = %C2%B7）。wiki 转录属社区转录（tier=high/secondary），游戏内文本应以官方为准。"
+    },
+    {
+      "id": "zzz_official_dump",
+      "applies_to": [
+        "绝区零",
+        "Zenless Zone Zero"
+      ],
+      "endpoint": null,
+      "script": "scripts/zzz_official_distribute.py（分发）；raw 归档 .csp-work/zzz-official-dump/（用户解包 2026-09-27）",
+      "tier": "highest",
+      "officiality": "official_text_dump",
+      "language": "zh-CN",
+      "status": "verified",
+      "notes": "用户本地解包的官方简中剧情文本（76MB：主线互动/对话/过场/支线/伙伴/路人/短信/活动/任务描述）。实测键位：主线=Main_GalGame_Chapter*（29,544 块）+Main_Chat；信赖事件=PartnerTalk_GalGame_Partner<英文代号>_（35 席）+Companion_GalGame_Chapter<代号>_（6 席，含 AnbySP=0号·安比）；短信=Message；秘话逐字剧本与角色档案【不在】本 dump（wiki 仍独家）。英文代号映射见 scripts/zzz_official_distribute.py CODENAME（Sunna=千夏、Azural=琉音经 Name 键验证）。模板变量 {F#铃}{M#哲} 派生层替换为 绳匠。中文优先指令（2026-09-27）：官方 dump 为前瞻主料，wiki 降 secondary。"
+    }
+  ],
+  "blacklist_domains_ref": "scripts/source_registry.py EXCLUDED_DOMAINS（zhihu.com / weixin.qq.com / baike.baidu.com，由 is_excluded_url 与 quality_check 双重强制）",
+  "batch_evidence": {
+    "崩坏：星穹铁道": "examples/崩坏星穹铁道/*/references/sources.json（39 条，highest 35）",
+    "绝区零": "examples/绝区零/*/references/jp-original/ + manifest（22 文件/12 万行/角色）",
+    "明日方舟": "examples/明日方舟/*/references/sources.json（ak-corpus-* 记录）",
+    "鸣潮": "examples/鸣潮/_batch/official-sources.json（124 条 kurobbs 官方来源）"
+  }
+}

@@ -1,0 +1,2 @@
+# Only the Japanese Zenless Zone Zero Wiki parser requires this package.
+beautifulsoup4>=4.12,<5

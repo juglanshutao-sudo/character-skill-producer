@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "policy": "Each game uses only its enabled sources. Downloaded content still needs review. Editing this file changes URL permissions; new API shapes may require adapter changes.",
+  "games": {
+    "genshin": {
+      "name": "原神", "aliases": ["Genshin Impact", "Genshin"], "guide": "games/genshin.md",
+      "sources": [{"id": "yatta", "type": "third_party_game_data", "role": "primary", "url_prefixes": ["https://gi.yatta.moe/"]}]
+    },
+    "hsr": {
+      "name": "崩坏星穹铁道", "aliases": ["崩铁", "崩坏：星穹铁道", "星穹铁道", "Honkai: Star Rail"], "guide": "games/hsr.md",
+      "sources": [
+        {"id": "mihoyo", "type": "publisher_wiki", "role": "primary", "url_prefixes": ["https://act-api-takumi-static.mihoyo.com/common/blackboard/sr_wiki/v1", "https://bbs.mihoyo.com/sr/wiki/"]},
+        {"id": "bwiki-sr", "type": "community_wiki", "role": "story_and_cross_check", "url_prefixes": ["https://wiki.biligame.com/sr/"]}
+      ]
+    },
+    "zzz": {
+      "name": "绝区零", "aliases": ["Zenless Zone Zero", "ZZZ"], "guide": "games/zzz.md",
+      "sources": [{"id": "wikiwiki-zenless", "type": "community_transcription", "role": "primary_japanese", "url_prefixes": ["https://wikiwiki.jp/zenless/"]}],
+      "local_material": "Optional user-provided client text; record provenance as supplied or unknown, never claim automatic extraction."
+    },
+    "wuwa": {
+      "name": "鸣潮", "aliases": ["Wuthering Waves", "WuWa"], "guide": "games/wuwa.md",
+      "sources": [{"id": "kurobbs", "type": "publisher_wiki", "role": "primary", "url_prefixes": ["https://api.kurobbs.com/wiki/core/catalogue/", "https://wiki.kurobbs.com/mc/"]}]
+    },
+    "arknights": {
+      "name": "明日方舟", "aliases": ["Arknights", "方舟"], "guide": "games/arknights.md",
+      "sources": [
+        {"id": "kengxxiao", "type": "community_game_data_repository", "role": "primary", "url_prefixes": ["https://github.com/Kengxxiao/ArknightsGameData", "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/", "https://api.github.com/repos/Kengxxiao/ArknightsGameData/"]},
+        {"id": "prts", "type": "community_wiki", "role": "cross_check", "url_prefixes": ["https://prts.wiki/"]},
+        {"id": "astr", "type": "community_reader", "role": "cross_check", "url_prefixes": ["https://050644zf.github.io/ArknightsStoryTextReader/"]},
+        {"id": "moegirl", "type": "community_wiki", "role": "cross_check", "url_prefixes": ["https://zh.moegirl.org.cn/"]},
+        {"id": "bwiki-ak", "type": "community_wiki", "role": "cross_check", "url_prefixes": ["https://wiki.biligame.com/arknights/"]}
+      ]
+    },
+    "endfield": {
+      "name": "终末地", "aliases": ["明日方舟：终末地", "Arknights: Endfield"], "guide": "games/endfield.md",
+      "sources": [{"id": "fz-wiki", "type": "community_wiki", "role": "primary", "url_prefixes": ["https://fz.wiki/wiki/", "https://www.fz.wiki/wiki/"]}]
+    }
+  }
+}

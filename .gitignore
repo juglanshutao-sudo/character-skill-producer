@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+workspace/
+workspaces/
+examples/
+runs/
+backups/
+_corpus/
+**/_corpus/
+**/jp-original/
+*.log
+.DS_Store

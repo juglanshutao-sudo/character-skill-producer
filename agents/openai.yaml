@@ -1,0 +1,4 @@
+interface:
+  display_name: "角色 Skill 蒸馏器"
+  short_description: "按六游戏指定网站获取语料，共用蒸馏标准生成可溯源的角色技能并检查"
+  default_prompt: "使用 $character-skill-producer，按配置的网站和共用标准为指定游戏角色生成 Skill。"

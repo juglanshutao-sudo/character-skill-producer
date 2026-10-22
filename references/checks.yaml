@@ -1,0 +1,156 @@
+# CSP 检查项总清单（单一事实源）
+#
+# 本文件是 SKILL_V2.md 的承诺、scripts/quality_check.py 的实现、preflight 对账
+# 三方共同读取的唯一清单。谁漂移谁显形：
+#   - 文档承诺了但这里没有条目  → 文档漂移
+#   - 这里登记了但脚本没实现    → 脚本漂移（quality_check --self-report 会标出）
+#   - 脚本实现了但这里没登记    → 未登记实现，preflight 视为漂移
+#
+# 修改任何一项检查，必须同时更新：本文件 + quality_check.py 实现 + SKILL_V2.md 对应段落。
+# YAML 子集：仅支持两级嵌套、列表、字符串/整数/布尔值，由 scripts 内置解析器读取（零依赖）。
+
+schema_version: "1.0"
+updated_at: "2026-09-07"
+description: "CSP 双层质检检查项总清单：结构门槛（第一层）+ 行为测试闭环（第二层）+ 更新保护（file_manager）"
+
+# ============================================================
+# 第一层：结构门槛（quality_check.py 执行）
+# threshold 为下限；CSP 不设上限（宁多勿少）。
+# ============================================================
+structural_checks:
+  - id: behavior_patterns_min
+    threshold: 10
+    description: "行为模式 >= 10 条（### 子标题计数），不设上限（2026-09-07 用户命令由 3 提至 10）"
+  - id: behavior_patterns_triplet
+    threshold: 1
+    description: "每条行为模式必须含完整三元组：情境→行为→为什么（以「为什么」段存在为准）"
+  - id: expression_texture_min
+    threshold: 4
+    description: "表达质感章节存在，且标记类别（句式/词汇/自称/语尾/节奏/情绪泄露等）>= 4 类"
+  - id: behavior_examples_min
+    threshold: 20
+    description: "行为示例（二级证据：场景/台词引用）>= 20 个（many-shot 下限，2026-09-06 由 3 提至 20）；每个示例必须带「> 规则：模式名」归属行，且每条行为模式 >= 3 个示例（2026-09-07 用户命令）；不设上限。证据不足时走单源降级阶梯（低置信/拒绝生成），不得降下限凑数"
+  - id: example_discriminability
+    threshold: 1
+    description: "选例三标准机器部分：每个行为示例必须含第一人称原话引用或命中本 skill 专属词表（词汇场+称呼段提取）；「换人不成立」机器不查，留给 judge 与人工"
+  - id: scene_source_spread
+    threshold: 1
+    description: "v2.3：05-key-scenes 场景的来源桶（任务id/故事/语音）>=4 个且任一桶占比 <=60%（2026-09-08 用户命令：剧情按重要程度均匀选取，不堆同一版本）"
+  - id: example_anchor_check
+    threshold: 1
+    description: "每个行为示例必须有 > 锚点： 行且指向真实存在的证据（05-key-scenes.md#场景标题=复现例 / 行为动态·规则名=外推例），假出处即 FAIL"
+  - id: honesty_boundary_min
+    threshold: 3
+    description: "诚实边界（我所知/我不知道）条目 >= 3 条"
+  - id: contradictions_preserved
+    threshold: 1
+    description: "保留矛盾/张力表述 >= 1 处（角色不被压平成完美人设）"
+  - id: role_play_rules
+    threshold: 1
+    description: "角色扮演规则段存在，含退出机制与第一人称指令"
+  - id: source_attribution
+    threshold: 1
+    description: "来源可追溯：SKILL.md 一行来源声明，或 sources.json 存在"
+  - id: manifest_fields
+    threshold: 1
+    description: "manifest.json 必填字段齐全（含 csp_version 与 evidence_density）"
+  - id: sources_json_records
+    threshold: 1
+    description: "sources.json 有记录，逐条含 retrieved_at，无黑名单域名来源"
+  - id: time_boundary_section
+    threshold: 1
+    description: "SKILL.md 含资料时间边界段 + 标准更新回应 + 日期"
+  - id: research_files
+    threshold: 1
+    description: "references/research/ 五个维度文件齐全"
+  # ---- 加固检查（2026-09 承诺兑现，此前仅有清单无实现）----
+  # ---- v2.2 上调项（2026-09-07，对齐原神批次 SOP）----
+  - id: pattern_example_coverage
+    threshold: 3
+    description: "每条行为模式 >=3 个示例，以 > 规则：模式名 双标注统计；标注必须指向行为动态真实规则标题；每例同时保留 > 锚点： 证据行"
+  - id: unknown_list_triggers
+    threshold: 3
+    description: "「我所不知」必须是含触发词的列表项（>=3 项，知识陷阱题从这里抽）；触发词：不知道/不明/不在场/未经历/没见过/从未/说不上等"
+  - id: scene_source_spread
+    threshold: 60
+    description: "取证选取策略（2026-09-07 用户指令）：证据场景跨篇目均匀分布——story 来源>=3 篇时单一来源占比<=60% 且来源>=3 篇；==2 篇时 <=75%；<=1 篇豁免（档案/单篇主导属证据本性）。场景选取特征优先：先定最鲜明特征，再选证明片段"
+  - id: variable_leak
+    threshold: 0
+    description: "产出文件（SKILL.md / references/*.md）零游戏模板变量泄漏（{@nickname}、{player_name} 类）"
+  - id: empty_placeholder
+    threshold: 0
+    description: "零空占位段：「以下/如下/包括」等引导句后必须跟实体内容"
+  - id: semantic_motive_check
+    threshold: 1
+    description: "字段语义抽查（启发式）：核心动机段必须像动机（含行动缘由表达），不得是头衔复述"
+  - id: csp_version_actual
+    threshold: 1
+    description: "manifest.csp_version 为实值（非 unknown），与 schema_version 主版本一致"
+  - id: self_contained
+    threshold: 0
+    description: "SKILL.md 自包含：正文零运行时依赖引用（详见/参见 references/...）"
+  - id: cross_skill_similarity
+    threshold: 0.2
+    mode: needs_human_review
+    calibrated: true
+    calibration_basis: "2026-09-06 双侧校准。阴性：244 个 skill、29554 个跨角色对，p99=0.017、max=0.164（scripts/calibrate_similarity.py）。阳性：三级抄袭样本实测（scripts/positive_control_similarity.py）——改名照抄 0.960、轻度改写 0.763、深度改写 0.466。0.2 高于阴性 max（约 1.2 倍）且低于最弱阳性（深度改写 0.466，约 2.3 倍余量），三级全命中；旧值 0.5 会漏掉深度改写。阴性样本为 v1 格式批次、阳性改写为 LLM 生成；v2 样本 >= 20 时应复校准"
+    positive_control: "scripts/positive_control_similarity.py（改名照抄/轻度改写/深度改写三级样本；改动检测口径或阈值后必跑，三级全命中才算阈值成立）"
+    known_blind_spot: "决心改写（逐句重写且不保留原话引用）可低于 0.2——表层相似度的原理性极限；该层防线在溯源审计（sources.json / 蒸馏留痕），本检查是绊线不是证明"
+    scope: "仅对比「行为动态 + 表达质感」两章；共享模板段显式排除"
+    signal: "双信号：字符 3-gram Jaccard（抓复制）+ difflib 序列比（抓改写），取最大值"
+    description: "与其他角色 Skill 的规则段相似度。超标仅列入 needs_human_review（永不自动 FAIL）"
+
+# ============================================================
+# 第二层：行为测试闭环（behavior_test.py 执行 + AI 编排）
+# ============================================================
+behavior_test:
+  exam_reproduction_count: 2
+  exam_extrapolation_count: 2
+  knowledge_trap_count: 1
+  knowledge_trap_rule: "陷阱题从「我不知道」清单确定性生成；没有它硬门（装知道=FAIL）不可触发，形同虚设"
+  evidence_chain_required: true
+  evidence_chain_rule: "每道题的期望反应必须引用 research 文件的场景与来源，禁止凭出题者记忆出题"
+  executor: fresh_sub_agent
+  executor_input: "只有 SKILL.md 正文 + 题目本身；禁止携带 research/distillation 等蒸馏侧材料"
+  contamination_guard: "子 agent 提示词由脚本生成且不含蒸馏侧文件；主 agent 记忆不得参与答题"
+  judge: independent
+  judge_rule: "judge 独立调用，输入只有题目 + 证据链 + 回答文本；四维各带 1-5 分锚点描述"
+  judge_dimensions: ["语气一致性", "行为模式命中", "知识边界", "口癖质感"]
+  pass_threshold_per_dim: 4
+  hard_gate_knowledge_boundary: true
+  hard_gate_rule: "回答对不在场之事装知道 = 整体 FAIL，四维分数再高也不通过"
+  mutation_testing: true
+  mutation_rule: "对 SKILL.md 做规则删除/替换突变后重测，judge 必须能检出退化；检不出 = 测试无效，结果记为 INCONCLUSIVE 不可采信（可能是等价突变，或扮演者参数化知识掩盖 skill 缺失——热门角色尤其常见，需改用 A/B 无 skill 对照或合成角色重测）"
+  ab_control: true
+  ab_control_rule: "突变 INCONCLUSIVE 时的规定后续：同一套题对无 skill 基线组（仅角色名+作品名+题目，零 skill 内容、零边界纪律指令）重测；A 组硬门过且 B 组硬门不过、或知识边界最低分差 >=2、或四维最低分总差 >=3，记 skill_contribution_detected=true；false 则表示该角色上本题面无可测增益（skill 价值转向边界/版本/可更新性/控制权）"
+  report: "references/behavior-report.json（含 exam_id、逐题证据、四维锚点分、硬门结果、突变结果、ab_control 对照）"
+
+# ============================================================
+# 更新保护（file_manager.py 执行）
+# ============================================================
+file_manager:
+  backup_before_update: true
+  backup_command: "python scripts/file_manager.py backup <skill_dir>"
+  snapshot_location: "backups/<name>-<date>/"
+  integrity_verify: "复制后核对文件数与字节数，不符即报错且拒绝继续更新"
+
+# ============================================================
+# preflight 对账规则
+# ============================================================
+preflight:
+  source_of_truth: "references/checks.yaml"
+  rules:
+    - "SKILL_V2.md 承诺的每个检查项必须在 structural_checks / behavior_test / file_manager 中有对应条目"
+    - "每个登记条目必须在 quality_check.py（结构层）或对应脚本中有实现，否则 --self-report 标记 unimplemented"
+    - "脚本中存在但未在本文件登记的检查 = 未登记实现，preflight 视为漂移"
+    - "模板标题对账：skill-template.md 的 ## 标题必须能被 quality_check / behavior_test 的章节正则与 MUTATIONS 模式命中；MUTATIONS 替换文本引入的新 ## 标题必须在模板标题集合内"
+    - "模板正文门禁：skill-template.md 的 markdown 围栏正文必须通过自身的 variable_leak / empty_placeholder / self_contained 检查，模板出厂即合格（标题对账只看标题，抓不住内容级矛盾，如附录列出 references/ 文件与 self_contained 零容忍冲突）"
+  doc_section_map:
+    - doc: "运行时单文件原则（下限规则）"
+      ids: ["behavior_patterns_min", "behavior_examples_min", "example_discriminability", "example_anchor_check", "pattern_example_coverage", "unknown_list_triggers", "scene_source_spread", "expression_texture_min", "honesty_boundary_min"]
+    - doc: "Phase 9 第一层（结构门槛 + 加固检查）"
+      ids: ["variable_leak", "empty_placeholder", "semantic_motive_check", "csp_version_actual", "self_contained", "cross_skill_similarity"]
+    - doc: "Phase 9 第二层（行为测试闭环）"
+      ids: ["exam_reproduction_count", "exam_extrapolation_count", "evidence_chain_required", "executor", "judge", "hard_gate_knowledge_boundary", "mutation_testing"]
+    - doc: "更新已有 Skill（备份强制）"
+      ids: ["backup_before_update", "integrity_verify"]

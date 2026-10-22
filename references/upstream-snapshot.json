@@ -1,0 +1,28 @@
+{
+  "upstream_sha256": {
+    "scripts/quality_check.py": "20f6e24b782a22ac53d51afd1bf979c23ae5211d77de467600e4c199bf218520",
+    "scripts/behavior_test.py": "0f3be6f361d3fa6c0db97697cddd011ad16cc109836904a08c90c5f1b67255bf",
+    "scripts/file_manager.py": "6451a2695640ea792c2897312e0485c8fbfb58c4acc1515c679fd3a54e33448b",
+    "scripts/generate_manifest.py": "ba1ce9111f5265b7c902e45c847502ab3d4273a6916a123fc4e1c1bd32a3d20a",
+    "scripts/merge_research.py": "e3151e0c6ef8161e8e741bd7bd500f0065e05d9a1f71014ab0c2d99c41145e71",
+    "scripts/preflight_check.py": "3dacc28e9e4627ee00106b73b10fb7d4ea17461b1ebe2681eade7a9f8e5958bd",
+    "scripts/source_search.py": "c7d88c0cea6eb948792da67e724b4a14bac87eef0dfb7082ee14b4df8fa305e4",
+    "scripts/source_registry.py": "75310d99f5ffffe230c03c6965f0963a1e64a8fdcfd4b89cfff90318d45956ef",
+    "scripts/genshin_yatta_api.py": "7ca9b88cbc310c2f645f72ea7839774daf3347f3858b5ec8fa2b53710685aeb8",
+    "scripts/hsr_official_api.py": "5572e0eed4a405bc5e67a772699e7518714bac49a55b3bce5d26b16c5d6e44a6",
+    "scripts/mc_wiki_api.py": "7d765335a81f78d319c3a7bb2c3af0cafadb0c97cca7aa4282653a4b3fe7bb38",
+    "scripts/zzz_wiki_api.py": "81632abc2b97a5878e7ca42a3a212fd23e52b4cd824b125a9eaa41becd4068d1",
+    "scripts/endfield_wiki_api.py": "841bb590315d0a308a974e921c58fb9d94f23a141e41fd5e9023fe3fbf142c41",
+    "scripts/bwiki_api.py": "2f5be29e02bab5ca23956972dac8da3c1a8a2e2ad30fc7b127570cf5cbf2c598",
+    "scripts/moegirl_api.py": "03bc914e8c26ceee8f5fc225b82526c217840ee64a9aa342a9db3f1c05d069a0",
+    "scripts/corpus_slicer.py": "6c9e30752e035afcb3332569f3a71d21f7ac0ae4ce0239f4db0d7f4d0edcf090",
+    "scripts/text_io.py": "25185421186d5cd3ac3dd643b6af45c193364b5cf55fa80ca6c47611d84552a2",
+    "scripts/v2_collect.py": "9acc9eba63018e090dfbeb1fead8b0a898c995084b71f620b4aece3e56faa1f9",
+    "SKILL_V2.md": "7b50683be14be3a9482655a62e1448c89877c70df2a872810ebdad3c1dab6208"
+  },
+  "portable_changes": [
+    "endfield: runtime retrieval date",
+    "v2_collect: remove historical mark-done/mark-light",
+    "v2_collect: workspace-relative outputs and include question blocks"
+  ]
+}
